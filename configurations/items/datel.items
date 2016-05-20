@@ -69,7 +69,7 @@ Number VersionSWFlat                  "Verze SW EnergyMeter [%.2f]"             
 Number HeartBeatFlat                  "HB elměr doma [%.0f]"                       <heart>        (dgElektroFlat, dgStatusy) 
     {mqtt="<[broker:/flat/EnergyMeter/esp09/HeartBeat:state:default]"}              
 DateTime LastUpdateEnergyFlat          "Update elměr doma [%1$ta %1$td %1$tb %1$tY %1$tT]"   <clock>   (dgElektroFlat, dgStatusy) 
-Switch dGEnergyFlat_Restart            "Restart ESP"                      		<power>        (dGF_ElektroFlat)
+Switch dGEnergyFlat_Restart            "Restart ESP"                      		<socket>        (dgElektroFlat)
     {mqtt=">[broker:/home/EnergyMeter/esp09/com:command:on:ON],
            >[broker:/home/EnergyMeter/esp09/com:command:off:OFF],
            <[broker:/home/EnergyMeter/esp09/state:state:default]"}
@@ -85,7 +85,7 @@ Number HeartBeatSwitch1           "HB halogen [%.0f]"                       <hea
 Number VersionSWSwitch1           "Verze SW Halogen [%.0f]"                 <keyring>      (dgOutdoor,dgStatusy) 
     {mqtt="<[broker:/home/Switch1/esp01/VersionSW:state:default]"}              
 DateTime LastUpdateSwitch1         "Update halogen [%1$ta %1$td %1$tb %1$tY %1$tT]"   <clock>   (dgOutdoor, dgStatusy) 
-Switch dGlamp1_Restart             "Restart ESP"                      		<power>        (dgOutdoor)
+Switch dGlamp1_Restart             "Restart ESP"                      		<socket>        (dgOutdoor)
     {mqtt=">[broker:/home/Switch1/esp01/com:command:on:ON],
            >[broker:/home/Switch1/esp01/com:command:off:OFF],
            <[broker:/home/Switch1/esp01/state:state:default]"}
@@ -101,7 +101,7 @@ Number HeartBeatSwitch2           "HB venkovní [%.0f]"                       <h
 Number VersionSWSwitch2           "Verze SW Venkovní [%.0f]"                 <keyring>      (dgOutdoor,dgStatusy) 
     {mqtt="<[broker:/home/Switch2/esp02/VersionSW:state:default]"}              
 DateTime LastUpdateSwitch2         "Update venkovní [%1$ta %1$td %1$tb %1$tY %1$tT]"   <clock>   (dgOutdoor, dgStatusy) 
-Switch dGlamp2_Restart             "Restart ESP"                      		<power>        (dgOutdoor)
+Switch dGlamp2_Restart             "Restart ESP"                      		<socket>        (dgOutdoor)
     {mqtt=">[broker:/home/Switch2/esp02/com:command:on:ON],
            >[broker:/home/Switch2/esp02/com:command:off:OFF],
            <[broker:/home/Switch2/esp02/state:state:default]"}
@@ -128,7 +128,7 @@ Number VersionSW                  "Verze SW EnergyMeter [%.2f]"             <key
 Number HeartBeat                  "HB elměr chata [%.0f]"                   <heart>        (dGF_Elektro, dgStatusy) 
     {mqtt="<[broker:/home/EnergyMeter/esp02/HeartBeat:state:default]"}              
 DateTime LastUpdateEnergy         "Update elměr chata [%1$ta %1$td %1$tb %1$tY %1$tT]"     <clock>   (dGF_Elektro, dgStatusy) 
-Switch dGEnergy_Restart           "Restart ESP"                      		<power>        (dGF_Elektro)
+Switch dGEnergy_Restart           "Restart ESP"                      		<socket>        (dGF_Elektro)
     {mqtt=">[broker:/home/EnergyMeter/esp02/com:command:on:ON],
            >[broker:/home/EnergyMeter/esp02/com:command:off:OFF],
            <[broker:/home/EnergyMeter/esp02/state:state:default]"}
@@ -169,7 +169,7 @@ Number VersionSWTemperatures       "Verze SW teploty [%.2f]"    	 <keyring>     
 Number HeartBeatTemperatures       "HB teploty [%.0f]"               <heart>              (dgTemperatures, dgTemperaturesIN, dgStatusy) 
     {mqtt="<[broker:/home/bedNew/esp03/HeartBeat:state:default]"}              
 DateTime LastUpdateTeploty         "Update teploty [%1$ta %1$td %1$tb %1$tY %1$tT]"   <clock>   (dgTemperatures, dgTemperaturesIN, dgStatusy) 
-Switch dGTeploty_Restart           "Restart ESP"                     <power>              (dgTemperatures)
+Switch dGTeploty_Restart           "Restart ESP"                     <socket>              (dgTemperaturesIN)
     {mqtt=">[broker:/home/bedNew/esp03/com:command:on:ON],
            >[broker:/home/bedNew/esp03/com:command:off:OFF],
            <[broker:/home/bedNew/esp03/state:state:default]"}
@@ -188,11 +188,11 @@ Number Meteo_tempDHT               "Teplota DHT [%.1f °C]"            <temperat
   {mqtt="<[broker:/home/Meteo/esp02/TempDHT:state:default]"}
 Number Meteo_temp085               "Teplota 085 [%.1f °C]"            <temperature>               (dgTemperatures, dOutdoor_Meteo) 
   {mqtt="<[broker:/home/Meteo/esp02/Temp085:state:default]"}
-Number Meteo_windDirection         "Směr větru [%.1f °]"              <temperature>               (dOutdoor_Meteo) 
+Number Meteo_windDirection         "Směr větru [%.1f °]"              <wind>               		  (dOutdoor_Meteo) 
   {mqtt="<[broker:/home/Meteo/esp02/WindDir:state:default]"}
-Number Meteo_speed                 "Rychlost větru [%.1f m/s]"        <temperature>               (dOutdoor_Meteo) 
+Number Meteo_speed                 "Rychlost větru [%.1f m/s]"        <wind>               		  (dOutdoor_Meteo) 
   {mqtt="<[broker:/home/Meteo/esp02/WindSpeed:state:default]"}
-Number Meteo_speedMax              "Rychlost větru nárazy [%.1f m/s]" <temperature>               (dOutdoor_Meteo) 
+Number Meteo_speedMax              "Rychlost větru nárazy [%.1f m/s]" <wind>                      (dOutdoor_Meteo) 
   {mqtt="<[broker:/home/Meteo/esp02/WindSpeedMax:state:default]"}
 
 
@@ -214,7 +214,7 @@ Number rainHour               	  "hodina [%.1f mm]"        		 <humidity>        
 Number rainDay                	  "den [%.1f mm]"           		 <humidity>                   (dOutdoor_Meteo) 
 Number rainMonth                  "měsíc [%.1f mm]"         		 <humidity>                   (dOutdoor_Meteo) 
 Number rainYear                   "rok [%.1f mm]"           		 <humidity>                   (dOutdoor_Meteo) 
-Switch dGRain_Restart             "Restart ESP srážky"                      <power>      				  (dOutdoor_Meteo)
+Switch dGRain_Restart             "Restart ESP srážky"                      <socket>      				  (dOutdoor_Meteo)
     {mqtt=">[broker:/home/Srazkomer/esp05/com:command:on:ON],
            >[broker:/home/Srazkomer/esp05/com:command:off:OFF],
            <[broker:/home/Srazkomer/esp05/state:state:default]"}
@@ -257,7 +257,7 @@ Number dGSolar_EnergyYear                    "Energie rok [%.4f kWh]"           
   {mqtt="<[broker:/home/Corridor/esp07/energyYear:state:default]"}
 String dGSolar_Data                          "Data"                         	                   <power>                                 (dgSolar)
   {mqtt="<[broker:/home/Corridor/esp07/data:state:default]"}
-Switch dGSolar_Restart                       "Restart ESP"                         	             <power>                                 (dgSolar)
+Switch dGSolar_Restart                       "Restart ESP"                         	             <socket>                                 (dgSolar)
     {mqtt=">[broker:/home/Corridor/esp07/com:command:on:ON],
            >[broker:/home/Corridor/esp07/com:command:off:OFF],
            <[broker:/home/Corridor/esp07/state:state:default]"}
@@ -303,7 +303,7 @@ Number VersionSWCentralHeating               "Verze SW Central [%.2f]"          
 Number HeartBeatCentralHeating     			 "HB topení [%.0f]"                       			           <heart>        				      (dgCentralHeating, dgStatusy) 
     {mqtt="<[broker:/home/Corridor/esp06/HeartBeat:state:default]"}              
 DateTime LastUpdateCentralHeating         	 "Update topení [%1$ta %1$td %1$tb %1$tY %1$tT]"       <clock>   					          (dgCentralHeating, dgStatusy) 
-Switch dGCentralHeating_Restart              "Restart ESP"                         	               <power>                      (dgCentralHeating)
+Switch dGCentralHeating_Restart              "Restart ESP"                         	               <socket>                      (dgCentralHeating)
     {mqtt=">[broker:/home/Corridor/esp06/com:command:on:ON],
            >[broker:/home/Corridor/esp06/com:command:off:OFF],
            <[broker:/home/Corridor/esp06/state:state:default]"}

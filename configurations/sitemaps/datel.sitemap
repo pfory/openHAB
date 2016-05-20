@@ -14,7 +14,7 @@ sitemap datel label="Hlavní nabídka" {
     Group item=dgRoof               label="Střecha"            icon="attic"
     Group item=dgSolar              label="Solár"              icon="solarplant"
     //Chart item=dGSolar_TempIN 		label="vstupni teplota" service="mysql" period=8h refresh=60000
-    Group item=dgCentralHeating     label="Central Heating"    icon="solarplant"
+    Group item=dgCentralHeating     label="Topení"    		   icon="fire-on"
     Group item=dgOutdoor            label="Zahrada"            icon="garden"
     Group item=dgTemperatures       label="Všechny teploty"    icon="temperature"
     Group item=dgTemperaturesIN     label="Teploty místností"  icon="temperature"
