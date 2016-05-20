@@ -1,0 +1,37 @@
+﻿sitemap datel label="Datel" {
+
+  Frame label="Datum" {
+    Text item=Datum
+  }
+
+  Frame label="Doma" {
+     Text item=Office_temp icon="temperature"
+  }
+
+  Frame label="Chata" {
+    Group item=dgGF            label="Přízemí"            icon="groundfloor"
+    Group item=dgFF            label="Podkroví"           icon="firstfloor"
+    Group item=dgOutdoor       label="Zahrada"            icon="garden"
+    Group item=dgTemperatures  label="Všechny Teploty"    icon="temperature"
+    Group item=dgLights        label="Všechna světla"     icon="light-off"
+  }
+     
+  Frame label="Počasí Šťáhlavice z Yahoo" {
+    Text item=Weather_Temperature_Stahlavice valuecolor=[Weather_LastUpdate_Stahlavice=="Uninitialized"="lightgray",Weather_LastUpdate_Stahlavice>90="lightgray",>25="orange",>15="green",>5="orange",<=5="blue"] icon="temperature" {
+      Frame {
+        Text item=Weather_Temp_Max_Stahlavice valuecolor=[>25="orange",>15="green",>5="orange",<=5="blue"]
+        Text item=Weather_Temp_Min_Stahlavice valuecolor=[>25="orange",>15="green",>5="orange",<=5="blue"]
+        Text item=Weather_Humidity_Stahlavice
+        Text item=Weather_Humidex_Stahlavice
+        Text item=Weather_LastUpdate_Stahlavice visibility=[Weather_LastUpdate_Stahlavice>30] valuecolor=[Weather_LastUpdate_Stahlavice>120="orange", Weather_LastUpdate_Stahlavice>300="red"]
+      }
+    
+      Frame {
+        Switch item=Weather_Chart_Period_Stahlavice label="Interval" mappings=[0="Hodina", 1="Den", 2="Týden"]
+        Chart item=Weather_Chart_Stahlavice period=h refresh=6000 visibility=[Weather_Chart_Period_Stahlavice==0, Weather_Chart_Period_Stahlavice=="Uninitialized"]
+        Chart item=Weather_Chart_Stahlavice period=D refresh=30000 visibility=[Weather_Chart_Period_Stahlavice==1]
+        Chart item=Weather_Chart_Stahlavice period=W refresh=30000 visibility=[Weather_Chart_Period_Stahlavice==2]
+      }
+    }
+  }
+}

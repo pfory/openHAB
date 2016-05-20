@@ -1,0 +1,78 @@
+﻿Group All
+Group dgGF            (All)
+Group dgFF            (All)
+Group dgOutdoor       (All)
+Group dgTemperatures  (All)
+Group dgLights        (All)
+Group Weather 		    (All)
+
+
+Group dGF_Living    "Obývák"            <video>         (dgGF)
+Group dGF_Corridor  "Chodba"            <corridor>      (dgGF)
+Group dGF_Hall      "Hala"              <corridor>      (dgGF)
+Group dGF_Bath      "Koupelna"          <bath>          (dgGF)
+Group dGF_Work      "Dílna"             <office>        (dgGF)
+Group dGF_Elektro   "Elektroměr"        <energy>        (dgGF)
+
+Group dGF_BedN      "Ložnice nová"      <bedroom>       (dgFF)
+Group dGF_BedO      "Ložnice stará"     <bedroom>       (dgFF)
+
+Group dOutdoor_Meteo "Meteostanice"     <video>         (dgOutdoor)
+Group dOutdoor_Green "Skleník"          <video>         (dgOutdoor)
+
+Switch lamp1         "Venkovní světlo na meteostanici"  (dgOutdoor)
+    {mqtt=">[broker:/home/1/esp01/p1/com:command:on:ON],>[broker:/home/1/esp01/p1/com:command:off:OFF],<[broker:/home/1/esp01/p1/state:state:default]"}
+
+Number Energy        "Spotřeba [%.2f kWh]" <energy>                    (dGF_Elektro) 
+    {mqtt="<[broker:/home/2/esp02/p1/Energy:state:default]"}
+Number EnergyDay        "Spotřeba den [%.2f kWh]" <energy>             (dGF_Elektro) 
+Number EnergyHour        "Spotřeba hodina[%.2f kWh]" <energy>          (dGF_Elektro) 
+Number Consumption        "Příkon [%.0f W]" <energy>                   (dGF_Elektro) 
+    
+Group:Switch:OR(ON, OFF) 		dgALights 		"Všechna světla [(%d)]" 								(All)
+
+//Obyvak
+Switch Light_GF_Living_Kitchen 		"Linka" 		                                            (dGF_Living, dgLights)
+Switch Light_GF_Living_Main 		  "Hlavní" 		                                            (dGF_Living, dgLights)
+
+Number LivingRoom_temp            "Teplota obývák [%.1f °C]" <temperature>                (dgTemperatures, dGF_Living) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+
+//Loznice nova
+Number BedN_temp                  "Teplota ložnice nová [%.1f °C]" <temperature>          (dgTemperatures, dGF_BedN) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+
+//Loznice stara
+Number BedO_temp                  "Teplota ložnice stará [%.1f °C]" <temperature>         (dgTemperatures, dGF_BedO) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+
+//Přízemí chodba
+Number Corridor_temp              "Teplota chodba [%.1f °C]" <temperature>                (dgTemperatures, dGF_Corridor) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+
+//Přízemí hala
+Number Hall_temp                  "Teplota hala [%.1f °C]" <temperature>                  (dgTemperatures, dGF_Hall) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+
+//Přízemí koupelna
+Number Bath_temp                  "Teplota koupelna [%.1f °C]" <temperature>              (dgTemperatures, dGF_Bath) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+
+//Přízemí dílna
+Number Work_temp                  "Teplota dílna [%.1f °C]" <temperature>                 (dgTemperatures, dGF_Work) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+
+
+//Meteostanice
+Number Meteo_temp                  "Teplota meteo [%.1f °C]"  <temperature>               (dgTemperatures, dOutdoor_Meteo) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+Number Meteo_press                 "Tlak [%.1f °Pa]"       <press>                        (dOutdoor_Meteo) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+Number Meteo_humidity              "Vlhkost [%.1f]"      <press>                          (dOutdoor_Meteo) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+Number Meteo_dewPoint              "Rosný bod [%.1f °C]"      <press>                     (dOutdoor_Meteo) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+Number Meteo_tempDHT               "Teplota DHT [%.1f °C]"  <temperature>                 (dgTemperatures, dOutdoor_Meteo) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+Number Meteo_temp085               "Teplota 085 [%.1f °C]"  <temperature>                 (dgTemperatures, dOutdoor_Meteo) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+Number Meteo_windDirection         "Směr větru [%.1f °]"  <temperature>                   (dOutdoor_Meteo) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+Number Meteo_speed                 "Rychlost větru [%.1f m/s]"  <temperature>             (dOutdoor_Meteo) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+Number Meteo_speedMax              "Rychlost větru nárazy [%.1f m/s]"  <temperature>      (dOutdoor_Meteo) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+
+//Skleník
+Number Green_temp                  "Teplota skleník [%.1f °C]"  <temperature>             (dgTemperatures, dOutdoor_Green) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+Number Green_humidity              "Vlhkost [%.1f]"     <temperature>                     (dOutdoor_Green) {mqtt="<[broker:/home/1/esp01/s1/state:state:default]"}
+
+/* NTP binding demo item */
+DateTime		Datum			"Datumy [%1$tA, %1$td.%1$tm.%1$tY]"	<calendar>	{ ntp="Europe/Prague:cs_CZ" }
+
+
+

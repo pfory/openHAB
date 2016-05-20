@@ -1,0 +1,73 @@
+sitemap datel label="Hlavní nabídka" {
+
+  Frame label="Datum" {
+    Text item=Datum
+  }
+
+//  Frame label="Doma" {
+//     Text item=Teplota              icon="temperature"
+//  }
+
+  Frame label="Chata" {
+    Group item=dgGF                 label="Přízemí"            icon="groundfloor"
+    Group item=dgFF                 label="Podkroví"           icon="firstfloor"
+    Group item=dgRoof               label="Střecha"            icon="attic"
+    Group item=dgSolar              label="Solár"              icon="solarplant"
+    //Chart item=dGSolar_TempIN 		label="vstupni teplota" service="mysql" period=8h refresh=60000
+    Group item=dgCentralHeating     label="Central Heating"    icon="solarplant"
+    Group item=dgOutdoor            label="Zahrada"            icon="garden"
+    Group item=dgTemperatures       label="Všechny teploty"    icon="temperature"
+    Group item=dgTemperaturesIN     label="Teploty místností"  icon="temperature"
+    Group item=dgLights             label="Všechna světla"     icon="light-off"
+  }
+
+
+  Frame label="Byt" {
+    Group item=dgElektroFlat      label="Elektroměr doma"         icon="energy"
+  }
+
+Frame label="Statusy" {
+	Group item=dgStatusy                 label="Statusy"            icon="heart"
+}
+  
+/*  Frame label="Počasí z Yahoo" {
+    Text item=Weather_Temperature_Stahlavice valuecolor=[Weather_LastUpdate_Stahlavice=="Uninitialized"="lightgray",Weather_LastUpdate_Stahlavice>90="lightgray",>25="orange",>15="green",>5="orange",<=5="blue"] {
+      Frame {
+        Text item=Weather_Temp_Max_Stahlavice valuecolor=[>30="red",>25="orange",>5="green",>-50="blue"]
+        Text item=Weather_Temp_Min_Stahlavice valuecolor=[>30="red",>25="orange",>5="green",>-50="blue"]
+        Text item=Weather_Pressure_Stahlavice
+        Text item=Weather_Humidity_Stahlavice
+        Text item=Weather_Humidex_Stahlavice
+        //Text item=Weather_LastUpdate_Stahlavice visibility=[Weather_LastUpdate_Stahlavice>0] valuecolor=[Weather_LastUpdate_Stahlavice>120="orange", Weather_LastUpdate_Stahlavice>300="red"]
+        Text item=Weather_LastUpdate_Stahlavice valuecolor=[Weather_LastUpdate_Stahlavice>120="orange", Weather_LastUpdate_Stahlavice>300="red"]
+      }
+    
+      Frame {
+        Switch item=Weather_Chart_Period_Stahlavice label="Interval" mappings=[0="Hodina", 1="Den", 2="Týden"]
+        Chart label="Teplota poslední hodina" item=Weather_Chart_Stahlavice period=h refresh=6000 visibility=[Weather_Chart_Period_Stahlavice==0, Weather_Chart_Period_Stahlavice=="Uninitialized"]
+        Chart item=Weather_Chart_Stahlavice period=D refresh=30000 visibility=[Weather_Chart_Period_Stahlavice==1]
+        Chart item=Weather_Chart_Stahlavice period=W refresh=30000 visibility=[Weather_Chart_Period_Stahlavice==2]
+      }
+    }
+
+    Text item=Weather_Temperature_Plzen valuecolor=[Weather_LastUpdate_Plzen=="Uninitialized"="lightgray",Weather_LastUpdate_Plzen>90="lightgray",>25="orange",>15="green",>5="orange",<=5="blue"] {
+      Frame {
+        Text item=Weather_Temp_Max_Plzen valuecolor=[>30="red",>25="orange",>5="green",>-50="blue"]
+        Text item=Weather_Temp_Min_Plzen valuecolor=[>30="red",>25="orange",>5="green",>-50="blue"]
+        Text item=Weather_Pressure_Plzen
+        Text item=Weather_Humidity_Plzen
+        Text item=Weather_Humidex_Plzen
+        //Text item=Weather_LastUpdate_Plzen visibility=[Weather_LastUpdate_Plzen>0] valuecolor=[Weather_LastUpdate_Plzen>120="orange", Weather_LastUpdate_Plzen>300="red"]
+        Text item=Weather_LastUpdate_Plzen valuecolor=[Weather_LastUpdate_Plzen>120="orange", Weather_LastUpdate_Plzen>300="red"]
+      }
+    
+      Frame {
+        Switch item=Weather_Chart_Period_Plzen label="Interval" mappings=[0="Hodina", 1="Den", 2="Týden"]
+        Chart label="Teplota poslední hodina" item=Weather_Chart_Plzen period=h refresh=6000 visibility=[Weather_Chart_Period_Plzen==0, Weather_Chart_Period_Plzen=="Uninitialized"]
+        Chart item=Weather_Chart_Plzen period=D refresh=30000 visibility=[Weather_Chart_Period_Plzen==1]
+        Chart item=Weather_Chart_Plzen period=W refresh=30000 visibility=[Weather_Chart_Period_Plzen==2]
+      }
+    }
+  }
+  * */
+}

@@ -1,0 +1,523 @@
+import org.openhab.core.library.types.*
+import org.openhab.core.persistence.*
+import org.openhab.model.script.actions.*
+import java.util.Date
+import org.joda.time.*
+import java.lang.Math
+  
+var Timer timer = null
+
+//var Calendar cal = Calendar.getInstance();
+var long oldTimeSolar=0
+
+//var Date lastPulse = null
+
+//var String mailTo = "pfory@seznam.cz"
+
+// Constants
+//var Number K = 0.017453
+
+// Change this reflecting your destination
+//Stahlavice 49.6601972N, 13.5315597E
+//var Number latitude = 49.6601972
+//var Number longitude = 13.5315597
+var Number koefRain = 0.2 //mm per pulse 
+
+
+rule "Update from database on startup"
+when System started
+then
+	EnergyTotalFlat.postUpdate(EnergyTotalFlat.previousState(true, "mysql").state)
+	EnergyHourFlat.postUpdate(EnergyHourFlat.previousState(true, "mysql").state)
+	EnergyDayFlat.postUpdate(EnergyDayFlat.previousState(true, "mysql").state)
+	EnergyMonthFlat.postUpdate(EnergyMonthFlat.previousState(true, "mysql").state)
+	EnergyYearFlat.postUpdate(EnergyYearFlat.previousState(true, "mysql").state)
+
+	EnergyTotal.postUpdate(EnergyTotal.previousState(true, "mysql").state)
+	EnergyHour.postUpdate(EnergyHour.previousState(true, "mysql").state)
+	EnergyDay.postUpdate(EnergyDay.previousState(true, "mysql").state)
+	EnergyMonth.postUpdate(EnergyMonth.previousState(true, "mysql").state)
+	EnergyYear.postUpdate(EnergyYear.previousState(true, "mysql").state)
+
+	dGSolar_EnergyTotal.postUpdate(dGSolar_EnergyTotal.previousState(true, "mysql").state)
+	dGSolar_EnergyDay.postUpdate(dGSolar_EnergyDay.previousState(true, "mysql").state)
+	dGSolar_EnergyMonth.postUpdate(dGSolar_EnergyMonth.previousState(true, "mysql").state)
+	dGSolar_EnergyYear.postUpdate(dGSolar_EnergyYear.previousState(true, "mysql").state)
+
+	PulseRain.postUpdate(PulseRain.previousState(false, "mysql").state)
+    rainHour.postUpdate(rainHour.previousState(false, "mysql").state)
+    rainDay.postUpdate(rainDay.previousState(false, "mysql").state)
+    rainMonth.postUpdate(rainMonth.previousState(false, "mysql").state)
+    rainYear.postUpdate(rainYear.previousState(false, "mysql").state)
+
+end
+
+
+rule "Lamp outdoor timed OFF"
+when
+	Item lamp1 received command
+then
+	if(receivedCommand==ON) {
+		//LogInfo("lamp1 (Outdoor)", "ON")
+		if(timer==null) {
+			// first ON command, so create a timer to turn the light off again
+			timer = createTimer(now.plusSeconds(300)) [|
+				sendCommand(lamp1, OFF)
+			]
+		} else {
+			// subsequent ON command, so reschedule the existing timer
+			timer.reschedule(now.plusSeconds(60))
+		}
+	} else if(receivedCommand==OFF) {
+		//LogInfo("lamp1 (Outdoor)", "OFF")
+		// remove any previously scheduled timer
+		if(timer!=null) {
+			timer.cancel
+			timer = null
+		}	
+	}
+end
+/**
+rule "Update max and min temperatures Stahlavice"
+when
+	Item Weather_Temperature_Stahlavice changed or
+	Time cron "0 0 0 * * ?" or
+	System started
+then	
+	postUpdate(Weather_Temp_Max_Stahlavice, Weather_Temperature_Stahlavice.maximumSince(now.toDateMidnight).state)
+	postUpdate(Weather_Temp_Min_Stahlavice, Weather_Temperature_Stahlavice.minimumSince(now.toDateMidnight).state)
+	logInfo("Weather","Temperature evolved of " + Weather_Temperature_Stahlavice.deltaSince(now.minusMinutes(2)).toString + " degrees.")
+end
+
+rule "Update max and min temperatures Plzen"
+when
+	Item Weather_Temperature_Plzen changed or
+	Time cron "0 0 0 * * ?" or
+	System started
+then	
+	postUpdate(Weather_Temp_Max_Plzen, Weather_Temperature_Plzen.maximumSince(now.toDateMidnight).state)
+	postUpdate(Weather_Temp_Min_Plzen, Weather_Temperature_Plzen.minimumSince(now.toDateMidnight).state)
+	logInfo("Weather","Temperature evolved of " + Weather_Temperature_Plzen.deltaSince(now.minusMinutes(2)).toString + " degrees.")
+end
+**/
+
+
+/** shows how to use sensor values from the past 
+rule "Persistence Stahlavice"
+when
+	Time cron "0 * * * * ?"
+then	
+	if(Weather_Temperature_Stahlavice.changedSince(now.minusMinutes(1))) {
+		println("2 minutes ago, the temperature was " + Weather_Temperature_Stahlavice.historicState(now.minusMinutes(2)) + " degrees.")		
+	}
+end
+
+/** shows how to use sensor values from the past 
+rule "Persistence Plzen"
+when
+	Time cron "0 * * * * ?"
+then	
+	if(Weather_Temperature_Plzen.changedSince(now.minusMinutes(1))) {
+		println("2 minutes ago, the temperature was " + Weather_Temperature_Plzen.historicState(now.minusMinutes(2)) + " degrees.")		
+	}
+end
+*/
+/**
+ * // Creates an item that stores the last update time of this item
+rule "Records last weather Plzen update time"
+when
+  Item Weather_Temperature_Plzen received update
+then
+  postUpdate(Weather_LastUpdate_Plzen, new DateTimeType())
+end
+
+// Creates an item that stores the last update time of this item
+rule "Records last weather Stahlavice update time"
+when
+  Item Weather_Temperature_Stahlavice received update
+then
+  postUpdate(Weather_LastUpdate_Stahlavice, new DateTimeType())
+end
+
+// This rule will be used to test Scale transformation service
+rule "Compute humidex Stahlavice"
+when Item Weather_Temperature_Stahlavice changed or
+	 Item Weather_Humidity_Stahlavice changed 
+then
+	var Number T = Weather_Temperature_Stahlavice.state as DecimalType
+	var Number H = Weather_Humidity_Stahlavice.state as DecimalType	
+	var Number x = 7.5 * T/(237.7 + T)
+	var Number e = 6.112 * Math::pow(10, x.doubleValue) * H/100
+	var Number humidex = T + (new Double(5) / new Double(9)) * (e - 10)
+	Weather_Humidex_Stahlavice.postUpdate(humidex)
+end
+
+// This rule will be used to test Scale transformation service
+rule "Compute humidex Plzen"
+when Item Weather_Temperature_Plzen changed or
+	 Item Weather_Humidity_Plzen changed 
+then
+	var Number T = Weather_Temperature_Plzen.state as DecimalType
+	var Number H = Weather_Humidity_Plzen.state as DecimalType	
+	var Number x = 7.5 * T/(237.7 + T)
+	var Number e = 6.112 * Math::pow(10, x.doubleValue) * H/100
+	var Number humidex = T + (new Double(5) / new Double(9)) * (e - 10)
+	Weather_Humidex_Plzen.postUpdate(humidex)
+end
+*/
+
+rule "Central heating"
+when Item HeartBeatCentralHeating changed
+then
+  LastUpdateCentralHeating.postUpdate(now.toString())
+end
+
+rule "Temperatures"
+when Item HeartBeatTemperatures changed
+then
+  LastUpdateTeploty.postUpdate(now.toString())
+end
+
+rule "Srazkomer"
+when Item HeartBeatSrazkomer changed
+then
+  LastUpdateSrazkomer.postUpdate(now.toString())
+end
+
+rule "Sklenik"
+when Item Green_temp received update
+then
+  LastUpdateSklenik.postUpdate(now.toString())
+end
+
+rule "Halogen"
+when Item HeartBeatSwitch1 changed
+then
+  LastUpdateSwitch1.postUpdate(now.toString())
+end
+
+rule "Venkovni"
+when Item HeartBeatSwitch2 changed
+then
+  LastUpdateSwitch2.postUpdate(now.toString())
+end
+
+rule "Solar"
+when Item HeartBeatSolar changed
+then
+  LastUpdateSolar.postUpdate(now.toString())
+end
+
+
+rule "Compute Energy"
+when Item Pulse changed
+then
+  var Number prirustek = (0.00125).doubleValue
+  var Number pulseOld=Pulse.previousState(true, "mysql").state as DecimalType
+  var Number pulse=Pulse.state as DecimalType
+  var Number pulseDiff = pulse-pulseOld
+  if (pulseDiff<0) {
+  	pulseDiff=1
+  }
+  prirustek = prirustek * pulseDiff
+  LastUpdateEnergy.postUpdate(now.toString())
+
+  if (EnergyTotal.state != Uninitialized) {
+    var Number et=EnergyTotal.state as DecimalType
+    
+    et = et + prirustek
+    EnergyTotal.postUpdate(et)
+  }   
+  
+  if (PulseLength.state != Uninitialized) {
+    var Number pl=PulseLength.state as DecimalType
+  	Consumption.postUpdate(2880000.0/pl)
+  }else{
+  	Consumption.postUpdate(0)
+  }
+
+
+  if (EnergyHour.state != Uninitialized) {
+    var Number eh=EnergyHour.state as DecimalType
+    eh = eh + prirustek
+    EnergyHour.postUpdate(eh)
+  }   
+
+  if (EnergyDay.state != Uninitialized) {
+    var Number ed=EnergyDay.state as DecimalType
+    ed = ed + prirustek
+    EnergyDay.postUpdate(ed)
+  }   
+
+  if (EnergyMonth.state != Uninitialized) {
+    var Number em=EnergyMonth.state as DecimalType
+    em = em + prirustek
+    EnergyMonth.postUpdate(em)
+  }   
+
+  if (EnergyYear.state != Uninitialized) {
+    var Number ey=EnergyYear.state as DecimalType
+    ey = ey + prirustek
+    EnergyYear.postUpdate(ey)
+  }   
+
+
+  //  sendMail("pfory@seznam.cz", "Energy changed", "test")
+end
+
+
+rule "Compute Energy Flat"
+when Item PulseFlat changed
+then
+  var Number prirustek = (0.001).doubleValue
+  var Number pulseOld=PulseFlat.previousState(true, "mysql").state as DecimalType
+  var Number pulse=PulseFlat.state as DecimalType
+  var Number pulseDiff = pulse-pulseOld
+  if (pulseDiff<0) {
+  	pulseDiff=1
+  }
+  prirustek = prirustek * pulseDiff
+  LastUpdateEnergyFlat.postUpdate(now.toString())
+  
+
+  if (EnergyTotalFlat.state != Uninitialized) {
+    var Number et=EnergyTotalFlat.state as DecimalType
+    et = et + prirustek
+    EnergyTotalFlat.postUpdate(et)
+  }
+  
+  if (PulseLengthFlat.state != Uninitialized) {
+    var Number pl=PulseLengthFlat.state as DecimalType
+  	ConsumptionFlat.postUpdate(3600000.0/pl)
+  }else{
+  	ConsumptionFlat.postUpdate(0)
+  }
+
+  if (EnergyHourFlat.state != Uninitialized) {
+    var Number eh=EnergyHourFlat.state as DecimalType
+    eh = eh + prirustek
+    EnergyHourFlat.postUpdate(eh)
+  }   
+
+  if (EnergyDayFlat.state != Uninitialized) {
+    var Number ed=EnergyDayFlat.state as DecimalType
+    ed = ed + prirustek
+    EnergyDayFlat.postUpdate(ed)
+  }   
+
+  if (EnergyMonthFlat.state != Uninitialized) {
+    var Number em=EnergyMonthFlat.state as DecimalType
+    em = em + prirustek
+    EnergyMonthFlat.postUpdate(em)
+  }
+  
+  if (EnergyYearFlat.state != Uninitialized) {
+    var Number ey=EnergyYearFlat.state as DecimalType
+    ey = ey + prirustek
+    EnergyYearFlat.postUpdate(ey)
+  }
+
+  //  sendMail("pfory@seznam.cz", "Energy changed", "test")
+end
+
+
+rule "Compute dGSolar_VykonSkutecny"
+when
+  Item dGSolar_TempIN changed or
+  Item dGSolar_TempOUT changed
+then
+  //logDebug("solar", now.toString())
+  if (dGSolar_EnergyTotal.state == Uninitialized) {
+	dGSolar_EnergyTotal.postUpdate(0)
+  }
+  if (dGSolar_EnergyDay.state == Uninitialized) {
+	dGSolar_EnergyDay.postUpdate(0)
+  }
+  if (dGSolar_EnergyMonth.state == Uninitialized) {
+	dGSolar_EnergyMonth.postUpdate(0)
+  }
+  if (dGSolar_EnergyYear.state == Uninitialized) {
+	dGSolar_EnergyYear.postUpdate(0)
+  }
+  if (dGSolar_Pump.state == ON) {
+    if (dGSolar_TempIN.state != Uninitialized) {
+      if (dGSolar_TempOUT.state != Uninitialized) {
+        var Number tIN = dGSolar_TempIN.state as DecimalType
+        var Number tOUT = dGSolar_TempOUT.state as DecimalType
+        if (tOUT > tIN) {
+          if (dGSolar_EnergyTotal.state==Uninitialized) {
+            dGSolar_EnergyTotal.postUpdate(1548)
+          }
+          if (dGSolar_EnergyDay.state==Uninitialized) {
+            dGSolar_EnergyDay.postUpdate(0)
+          }
+          if (dGSolar_EnergyMonth.state==Uninitialized) {
+            dGSolar_EnergyMonth.postUpdate(0) 
+          }
+          if (dGSolar_EnergyYear.state==Uninitialized) {
+            dGSolar_EnergyYear.postUpdate(0)
+          }
+
+		  var long deltaTime = now.millis - oldTimeSolar
+		  oldTimeSolar = now.millis
+		  logDebug("solar", deltaTime.toString())
+          var Number energyDiff = deltaTime*((tOUT - tIN) * 343)/1000/3600/1000; //in kWh
+		  logDebug("solar", energyDiff.toString())
+          var Number energyTotalOld = dGSolar_EnergyTotal.state as DecimalType
+          var Number energyDayOld = dGSolar_EnergyDay.state as DecimalType
+          var Number energyMonthOld = dGSolar_EnergyMonth.state as DecimalType
+          var Number energyYearOld = dGSolar_EnergyYear.state as DecimalType
+          dGSolar_EnergyTotal.postUpdate(energyTotalOld + energyDiff)
+          dGSolar_EnergyDay.postUpdate(energyDayOld + energyDiff)
+          dGSolar_EnergyMonth.postUpdate(energyMonthOld + energyDiff)
+          dGSolar_EnergyYear.postUpdate(energyYearOld + energyDiff)
+          /*dGSolar_EnergyTotal.postUpdate(0)
+          dGSolar_EnergyDay.postUpdate(0)
+          dGSolar_EnergyMonth.postUpdate(0)
+          dGSolar_EnergyYear.postUpdate(0)*/
+          dGSolar_VykonSkutecny.postUpdate((tOUT - tIN) * 343)
+          
+        }
+      }
+    }
+  }else{  
+    dGSolar_VykonSkutecny.postUpdate(0)
+  }
+end
+
+
+rule "Compute Solar Power Theoretical"
+when 
+	Time cron "0 * * * * ?"
+then 
+  var Number alfa = Math::toRadians((45.0).doubleValue)  //naklon kolektoru 45
+  var Number azimutKolektoru = (230.0).doubleValue  //azimut kolektoru
+  var Number vyskaSlunce = SunPositionElevation.state as DecimalType  //Výška slunce
+  var Number azimutSlunce = SunPositionAzimuth.state as DecimalType //Azimut slunce
+  
+  vyskaSlunce = vyskaSlunce.doubleValue
+  azimutSlunce = azimutSlunce.doubleValue
+  
+  //var Number gama=Math::acos(Math::sin(Math::toRadians(vyskaSlunce))*Math::cos(alfa)+Math::cos(Math::toRadians(vyskaSlunce))*Math::sin(alfa)*Math::cos(Math::toRadians(azimutSlunce-azimutKolektoru)))
+  var Number gama=Math::sin(Math::toRadians(vyskaSlunce.doubleValue()))*Math::cos(alfa.doubleValue)+Math::cos(Math::toRadians(vyskaSlunce.doubleValue))*Math::sin(alfa.doubleValue)*Math::cos(Math::toRadians((azimutSlunce-azimutKolektoru).doubleValue))
+  gama = Math::acos(gama.doubleValue)
+
+  if (gama>90) {
+	 dGSolar_Vykon.postUpdate(0)
+  }else if (vyskaSlunce>0) {
+ 	//var Number cosGama=Math::cos(gama.doubleValue)
+   //var Number vykonKolektor=cosGama*1360*1.6928 //plocha 1.6928m2 - maximalni teoreticky vykon solaru = 2302W
+ 	dGSolar_Vykon.postUpdate(Math::cos(gama.doubleValue)*1360*1.6928)
+  }
+end
+
+
+rule "Reset hour"
+when
+	Time cron "0 0 * * * ?"
+then	
+  EnergyHour.postUpdate(0)
+  EnergyHourFlat.postUpdate(0)
+  rainHour.postUpdate(0)
+end
+
+/*
+rule "Pulse simulation"
+when
+	//Time cron "/5 * * * * ?"
+then	
+  var Number pulse=Pulse.state as DecimalType
+  pulse = pulse + 1
+  Pulse.postUpdate(pulse)
+end
+ */
+
+rule "Reset day"
+when
+	Time cron "0 0 0 * * ?"
+then	
+  EnergyDay.postUpdate(0)
+  EnergyDayFlat.postUpdate(0)
+  dGSolar_EnergyDay.postUpdate(0)
+  rainDay.postUpdate(0)
+end
+
+rule "Reset month"
+when
+	Time cron "0 0 0 1 * ?"
+then	
+  EnergyMonth.postUpdate(0)
+  EnergyMonthFlat.postUpdate(0)
+  dGSolar_EnergyMonth.postUpdate(0)
+  rainMonth.postUpdate(0)
+end
+
+rule "Reset year"
+when
+	Time cron "0 0 0 1 1 ?"
+then	
+  EnergyYear.postUpdate(0)
+  EnergyYearFlat.postUpdate(0)
+  dGSolar_EnergyYear.postUpdate(0)
+  rainYear.postUpdate(0)
+end
+
+
+
+rule "PulseRain"
+when
+  Item PulseRain changed
+then
+	if (PulseRain.state as DecimalType==0) {
+		rainLastHour.postUpdate(0)
+		rainLastDay.postUpdate(0)
+		rainLastMonth.postUpdate(0)
+		rainLastYear.postUpdate(0)
+		rainHour.postUpdate(0)
+		rainDay.postUpdate(0)
+		rainMonth.postUpdate(0)
+		rainYear.postUpdate(0)
+	} else {
+		PulseRainOne.postUpdate(1)
+		LastUpdatePulse.postUpdate(now.toString())
+		rainLastHour.postUpdate(PulseRainOne.sumSince(now().minusHours(1), "mysql")*koefRain)
+		rainLastDay.postUpdate(PulseRainOne.sumSince(now().minusDays(1), "mysql")*koefRain)
+		rainLastMonth.postUpdate(PulseRainOne.sumSince(now().minusMonths(1), "mysql")*koefRain)
+		rainLastYear.postUpdate(PulseRainOne.sumSince(now().minusYears(1), "mysql")*koefRain)
+	    
+	    if (rainHour.state != Uninitialized) {
+	      var Number stav=rainHour.state as DecimalType
+	      rainHour.postUpdate((stav + koefRain)
+	    } else {
+	      rainHour.postUpdate(koefRain)
+	    }  
+	    if (rainDay.state != Uninitialized) {
+	      var Number stav=rainDay.state as DecimalType
+	      rainDay.postUpdate((stav + koefRain)
+	    } else {
+	      rainDay.postUpdate(koefRain)
+	    }   
+	    if (rainMonth.state != Uninitialized) {
+	      var Number stav=rainMonth.state as DecimalType
+	      rainMonth.postUpdate((stav + koefRain)
+	    } else {
+	      rainMonth.postUpdate(koefRain)
+	    }   
+	    if (rainYear.state != Uninitialized) {
+	      var Number stav=rainYear.state as DecimalType
+	      rainYear.postUpdate((stav + koefRain)
+	    } else {
+	      rainYear.postUpdate(koefRain)
+	    }   
+	}
+end
+
+rule "Srazky"
+when
+	Time cron "0 * * * * ?"
+then
+	rainLastHour.postUpdate(PulseRainOne.sumSince(now().minusHours(1), "mysql")*koefRain)
+	rainLastDay.postUpdate(PulseRainOne.sumSince(now().minusDays(1), "mysql")*koefRain)
+	rainLastMonth.postUpdate(PulseRainOne.sumSince(now().minusMonths(1), "mysql")*koefRain)
+	rainLastYear.postUpdate(PulseRainOne.sumSince(now().minusYears(1), "mysql")*koefRain)
+end
