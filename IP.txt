@@ -1,8 +1,8 @@
-192.168.1.150 - srážkomìr 	/home/Srazkomer/esp05/
-192.168.1.151 - teplomer 	/home/bedNew/esp03/
-192.168.1.152 - solár 		/home/Corridor/esp07/
-192.168.1.153 - topení 		/home/Corridor/esp06/
-192.168.1.154
+192.168.1.150 - srážkomìr /home/Srazkomer/esp05/
+192.168.1.151 - teplomer  /home/bedNew/esp03/
+192.168.1.152 - solár     /home/Corridor/esp07/
+192.168.1.153 - topení    /home/Corridor/esp06/
+192.168.1.154 - halogen   /home/Switch1/esp01/
 192.168.1.155
 192.168.1.156
 192.168.1.157
