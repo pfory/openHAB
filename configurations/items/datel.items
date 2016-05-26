@@ -86,9 +86,9 @@ Number VersionSWSwitch1           "Verze SW Halogen [%.0f]"                 <key
     {mqtt="<[broker:/home/Switch1/esp01/VersionSW:state:default]"}              
 DateTime LastUpdateSwitch1         "Update halogen [%1$ta %1$td %1$tb %1$tY %1$tT]"   <clock>   (dgOutdoor, dgStatusy) 
 Switch dGlamp1_Restart             "Restart ESP"                      		<socket>        (dgOutdoor)
-    {mqtt=">[broker:/home/Switch1/esp01/com:command:on:ON],
-           >[broker:/home/Switch1/esp01/com:command:off:OFF],
-           <[broker:/home/Switch1/esp01/state:state:default]"}
+    {mqtt=">[broker:/home/Switch1/esp01/comres:command:on:ON],
+           >[broker:/home/Switch1/esp01/comres:command:off:OFF],
+           <[broker:/home/Switch1/esp01/stateres:state:default]"}
 
 
 
@@ -102,9 +102,9 @@ Number VersionSWSwitch2           "Verze SW Venkovní [%.0f]"                 <k
     {mqtt="<[broker:/home/Switch2/esp02/VersionSW:state:default]"}              
 DateTime LastUpdateSwitch2         "Update venkovní [%1$ta %1$td %1$tb %1$tY %1$tT]"   <clock>   (dgOutdoor, dgStatusy) 
 Switch dGlamp2_Restart             "Restart ESP"                      		<socket>        (dgOutdoor)
-    {mqtt=">[broker:/home/Switch2/esp02/com:command:on:ON],
-           >[broker:/home/Switch2/esp02/com:command:off:OFF],
-           <[broker:/home/Switch2/esp02/state:state:default]"}
+    {mqtt=">[broker:/home/Switch2/esp02/comres:command:on:ON],
+           >[broker:/home/Switch2/esp02/comres:command:off:OFF],
+           <[broker:/home/Switch2/esp02/stateres:state:default]"}
 
 
 //ENERGY METER HOUSE   
