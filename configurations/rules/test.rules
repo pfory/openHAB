@@ -293,7 +293,7 @@ when
   Item dGSolar_TempOUT changed
 then
   LastUpdateSolar.postUpdate(now.toString())
-  //logDebug("solar", now.toString())
+  //logDebug("pf", now.toString())
   if (dGSolar_EnergyTotal.state == Uninitialized) {
 	dGSolar_EnergyTotal.postUpdate(0)
   }
@@ -327,9 +327,9 @@ then
 
 		  var long deltaTime = now.millis - oldTimeSolar
 		  oldTimeSolar = now.millis
-		  logDebug("solar", deltaTime.toString())
+		  logDebug("pf", deltaTime.toString())
           var Number energyDiff = deltaTime*((tOUT - tIN) * 343)/1000/3600/1000; //in kWh
-		  logDebug("solar", energyDiff.toString())
+		  logDebug("pf", energyDiff.toString())
           var Number energyTotalOld = dGSolar_EnergyTotal.state as DecimalType
           var Number energyDayOld = dGSolar_EnergyDay.state as DecimalType
           var Number energyMonthOld = dGSolar_EnergyMonth.state as DecimalType

@@ -43,7 +43,9 @@ then
 	dGSolar_EnergyDay.postUpdate(dGSolar_EnergyDay.previousState(true, "mysql").state)
 	dGSolar_EnergyMonth.postUpdate(dGSolar_EnergyMonth.previousState(true, "mysql").state)
 	dGSolar_EnergyYear.postUpdate(dGSolar_EnergyYear.previousState(true, "mysql").state)
-
+	dGSolar_MinutesDay.postUpdate(dGSolar_MinutesDay.previousState(true, "mysql").state)
+	dGSolar_MinutesTotal.postUpdate(dGSolar_MinutesTotal.previousState(true, "mysql").state)
+  
 	PulseRain.postUpdate(PulseRain.previousState(false, "mysql").state)
     rainHour.postUpdate(rainHour.previousState(false, "mysql").state)
     rainDay.postUpdate(rainDay.previousState(false, "mysql").state)
@@ -322,11 +324,10 @@ end
 
 
 rule "Compute dGSolar_VykonSkutecny"
-when
-  Item dGSolar_TempIN changed or
-  Item dGSolar_TempOUT changed
+when 
+	Item HeartBeatSolar changed
 then
-  //logDebug("solar", now.toString())
+  //logDebug("pf", now.toString())
   if (dGSolar_EnergyTotal.state == Uninitialized) {
 	dGSolar_EnergyTotal.postUpdate(0)
   }
@@ -339,13 +340,26 @@ then
   if (dGSolar_EnergyYear.state == Uninitialized) {
 	dGSolar_EnergyYear.postUpdate(0)
   }
+
   if (dGSolar_Pump.state == ON) {
+    if (dGSolar_lastOFFDay==Uninitialized) {
+      logDebug("pf", "dGSolar_lastOFFDay:"+now.toString())
+      dGSolar_lastOFFDay.postUpdate(now.toString())
+    }
+  }
+
+  if (dGSolar_Pump.state == ON) {
+    if (dGSolar_firstONDay==Uninitialized or dGSolar_firstONDay==null) {
+      logDebug("pf", "dGSolar_firstONDay:"+now.toString())
+      dGSolar_firstONDay.postUpdate(now.toString())
+    }
+        
     if (dGSolar_TempIN.state != Uninitialized) {
       if (dGSolar_TempOUT.state != Uninitialized) {
         var Number tIN = dGSolar_TempIN.state as DecimalType
         var Number tOUT = dGSolar_TempOUT.state as DecimalType
         if (tOUT > tIN) {
-          if (dGSolar_EnergyTotal.state==Uninitialized) {
+          /*if (dGSolar_EnergyTotal.state==Uninitialized) {
             dGSolar_EnergyTotal.postUpdate(1548)
           }
           if (dGSolar_EnergyDay.state==Uninitialized) {
@@ -356,27 +370,38 @@ then
           }
           if (dGSolar_EnergyYear.state==Uninitialized) {
             dGSolar_EnergyYear.postUpdate(0)
+          }*/
+        
+          if (oldTimeSolar>0) {
+            var long deltaTime = now.millis - oldTimeSolar
+            var Number minDayOld = dGSolar_MinutesDay.state as DecimalType
+            var Number minTotalOld = dGSolar_MinutesTotal.state as DecimalType
+            dGSolar_MinutesDay.postUpdate(minDayOld+(deltaTime/60000))
+            dGSolar_MinutesTotal.postUpdate(minTotalOld+deltaTime/60000))
+            oldTimeSolar = now.millis
+            logDebug("pf", "-------------------")
+            logDebug("pf", "deltaTime:"+deltaTime.toString())
+            logDebug("pf", "tIN:"+tIN.toString())
+            logDebug("pf", "tOUT:"+tOUT.toString())
+            var Number energyDiff = deltaTime*((tOUT - tIN) * 343)/1000/3600/1000; //in kWh
+            logDebug("pf", "energyDiff:"+energyDiff.toString())
+            var Number energyTotalOld = dGSolar_EnergyTotal.state as DecimalType
+            var Number energyDayOld = dGSolar_EnergyDay.state as DecimalType
+            var Number energyMonthOld = dGSolar_EnergyMonth.state as DecimalType
+            var Number energyYearOld = dGSolar_EnergyYear.state as DecimalType
+            dGSolar_EnergyTotal.postUpdate(energyTotalOld + energyDiff)
+            dGSolar_EnergyDay.postUpdate(energyDayOld + energyDiff)
+            dGSolar_EnergyMonth.postUpdate(energyMonthOld + energyDiff)
+            dGSolar_EnergyYear.postUpdate(energyYearOld + energyDiff)
+            logDebug("pf", "xxxxxxxxxxxxxxxxxxxxxxxxx")
+            /*dGSolar_EnergyTotal.postUpdate(0)
+            dGSolar_EnergyDay.postUpdate(0)
+            dGSolar_EnergyMonth.postUpdate(0)
+            dGSolar_EnergyYear.postUpdate(0)*/
+            dGSolar_VykonSkutecny.postUpdate((tOUT - tIN) * 343)
+          } else {
+            oldTimeSolar = now.millis
           }
-
-		  var long deltaTime = now.millis - oldTimeSolar
-		  oldTimeSolar = now.millis
-		  logDebug("solar", deltaTime.toString())
-          var Number energyDiff = deltaTime*((tOUT - tIN) * 343)/1000/3600/1000; //in kWh
-		  logDebug("solar", energyDiff.toString())
-          var Number energyTotalOld = dGSolar_EnergyTotal.state as DecimalType
-          var Number energyDayOld = dGSolar_EnergyDay.state as DecimalType
-          var Number energyMonthOld = dGSolar_EnergyMonth.state as DecimalType
-          var Number energyYearOld = dGSolar_EnergyYear.state as DecimalType
-          dGSolar_EnergyTotal.postUpdate(energyTotalOld + energyDiff)
-          dGSolar_EnergyDay.postUpdate(energyDayOld + energyDiff)
-          dGSolar_EnergyMonth.postUpdate(energyMonthOld + energyDiff)
-          dGSolar_EnergyYear.postUpdate(energyYearOld + energyDiff)
-          /*dGSolar_EnergyTotal.postUpdate(0)
-          dGSolar_EnergyDay.postUpdate(0)
-          dGSolar_EnergyMonth.postUpdate(0)
-          dGSolar_EnergyYear.postUpdate(0)*/
-          dGSolar_VykonSkutecny.postUpdate((tOUT - tIN) * 343)
-          
         }
       }
     }
@@ -392,8 +417,22 @@ when
 then 
   var Number alfa = Math::toRadians((45.0).doubleValue)  //naklon kolektoru 45
   var Number azimutKolektoru = (230.0).doubleValue  //azimut kolektoru
-  var Number vyskaSlunce = SunPositionElevation.state as DecimalType  //Výška slunce
-  var Number azimutSlunce = SunPositionAzimuth.state as DecimalType //Azimut slunce
+  var Number vyskaSlunce = 0
+  var Number azimutSlunce = 0
+  if (SunPositionElevation.state != Uninitialized) {
+    vyskaSlunce = SunPositionElevation.state as DecimalType  //Výška slunce
+logDebug("pf", "vyskaSlunce")
+logDebug("pf", vyskaSlunce.toString())
+  } else { 
+    return false
+  }
+  if (SunPositionAzimuth.state != Uninitialized) {
+    azimutSlunce = SunPositionAzimuth.state as DecimalType //Azimut slunce
+logDebug("pf", "azimutSlunce")
+logDebug("pf", azimutSlunce.toString())
+  } else {
+    return false
+  }
   
   vyskaSlunce = vyskaSlunce.doubleValue
   azimutSlunce = azimutSlunce.doubleValue
@@ -440,6 +479,9 @@ then
   EnergyDayFlat.postUpdate(0)
   dGSolar_EnergyDay.postUpdate(0)
   rainDay.postUpdate(0)
+  dGSolar_lastOFFDay.postUpdate(null)
+  dGSolar_firstONDay.postUpdate(null)
+  dGSolar_MinutesDay.postUpdate(0)
 end
 
 rule "Reset month"
@@ -487,25 +529,25 @@ then
 	    
 	    if (rainHour.state != Uninitialized) {
 	      var Number stav=rainHour.state as DecimalType
-	      rainHour.postUpdate((stav + koefRain)
+	      rainHour.postUpdate(stav + koefRain)
 	    } else {
 	      rainHour.postUpdate(koefRain)
 	    }  
 	    if (rainDay.state != Uninitialized) {
 	      var Number stav=rainDay.state as DecimalType
-	      rainDay.postUpdate((stav + koefRain)
+	      rainDay.postUpdate(stav + koefRain)
 	    } else {
 	      rainDay.postUpdate(koefRain)
 	    }   
 	    if (rainMonth.state != Uninitialized) {
 	      var Number stav=rainMonth.state as DecimalType
-	      rainMonth.postUpdate((stav + koefRain)
+	      rainMonth.postUpdate(stav + koefRain)
 	    } else {
 	      rainMonth.postUpdate(koefRain)
 	    }   
 	    if (rainYear.state != Uninitialized) {
 	      var Number stav=rainYear.state as DecimalType
-	      rainYear.postUpdate((stav + koefRain)
+	      rainYear.postUpdate(stav + koefRain)
 	    } else {
 	      rainYear.postUpdate(koefRain)
 	    }   
