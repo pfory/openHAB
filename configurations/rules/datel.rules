@@ -341,15 +341,15 @@ then
 	dGSolar_EnergyYear.postUpdate(0)
   }
 
-  if (dGSolar_Pump.state == ON) {
-    if (dGSolar_lastOFFDay==Uninitialized) {
+  if (dGSolar_Pump.state == OFF) {
+    if (dGSolar_lastOFFDay==Uninitialized || dGSolar_lastOFFDay==null) {
       logDebug("pf", "dGSolar_lastOFFDay:"+now.toString())
       dGSolar_lastOFFDay.postUpdate(now.toString())
     }
   }
 
   if (dGSolar_Pump.state == ON) {
-    if (dGSolar_firstONDay==Uninitialized or dGSolar_firstONDay==null) {
+    if (dGSolar_firstONDay==Uninitialized  || dGSolar_firstONDay==null) {
       logDebug("pf", "dGSolar_firstONDay:"+now.toString())
       dGSolar_firstONDay.postUpdate(now.toString())
     }
@@ -377,7 +377,7 @@ then
             var Number minDayOld = dGSolar_MinutesDay.state as DecimalType
             var Number minTotalOld = dGSolar_MinutesTotal.state as DecimalType
             dGSolar_MinutesDay.postUpdate(minDayOld+(deltaTime/60000))
-            dGSolar_MinutesTotal.postUpdate(minTotalOld+deltaTime/60000))
+            dGSolar_MinutesTotal.postUpdate(minTotalOld+deltaTime/60000)
             oldTimeSolar = now.millis
             logDebug("pf", "-------------------")
             logDebug("pf", "deltaTime:"+deltaTime.toString())
