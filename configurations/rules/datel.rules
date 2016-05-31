@@ -45,12 +45,18 @@ then
 	dGSolar_EnergyYear.postUpdate(dGSolar_EnergyYear.previousState(true, "mysql").state)
 	dGSolar_MinutesDay.postUpdate(dGSolar_MinutesDay.previousState(true, "mysql").state)
 	dGSolar_MinutesTotal.postUpdate(dGSolar_MinutesTotal.previousState(true, "mysql").state)
-  
+
+	rainLastHour.postUpdate(PulseRainOne.sumSince(now().minusHours(1), "mysql")*koefRain)
+	rainLastDay.postUpdate(PulseRainOne.sumSince(now().minusDays(1), "mysql")*koefRain)
+	rainLastMonth.postUpdate(PulseRainOne.sumSince(now().minusMonths(1), "mysql")*koefRain)
+	rainLastYear.postUpdate(PulseRainOne.sumSince(now().minusYears(1), "mysql")*koefRain)
+
+ 	rainHour.postUpdate(PulseRainOne.sumSince(now().withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0), "mysql")*koefRain)
+	rainDay.postUpdate(PulseRainOne.sumSince(now().withTimeAtStartOfDay(), "mysql")*koefRain)
+	rainMonth.postUpdate(PulseRainOne.sumSince(now().withDayOfMonth(1).withMillisOfDay(0), "mysql")*koefRain)
+	rainYear.postUpdate(PulseRainOne.sumSince(now().withDayOfYear(1).withMillisOfDay(0), "mysql")*koefRain)
+
 	PulseRain.postUpdate(PulseRain.previousState(false, "mysql").state)
-    rainHour.postUpdate(rainHour.previousState(false, "mysql").state)
-    rainDay.postUpdate(rainDay.previousState(false, "mysql").state)
-    rainMonth.postUpdate(rainMonth.previousState(false, "mysql").state)
-    rainYear.postUpdate(rainYear.previousState(false, "mysql").state)
 
 end
 
