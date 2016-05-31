@@ -210,15 +210,15 @@ Number HeartBeatSrazkomer         "HB srážkoměr [%.0f]"               	<heart
     {mqtt="<[broker:/home/Srazkomer/esp05/HeartBeat:state:default]"}              
 DateTime LastUpdateSrazkomer      "Update srážkoměr [%1$ta %1$td %1$tb %1$tY %1$tT]"   <clock>    (dOutdoor_Meteo, dgStatusyLast,dgStatusy) 
 DateTime LastUpdatePulse          "Poslední překlopení [%1$ta %1$td %1$tb %1$tY %1$tT]"<clock>    (dOutdoor_Meteo) 
-Number rainLastHour               "poslední hodina [%.1f mm]"        <humidity>            	  	  (dOutdoor_Meteo) 
-Number rainLastDay                "poslední den [%.1f mm]"           <humidity>                   (dOutdoor_Meteo) 
-Number rainLastMonth              "poslední měsíc [%.1f mm]"         <humidity>                   (dOutdoor_Meteo) 
-Number rainLastYear               "poslední rok [%.1f mm]"           <humidity>                   (dOutdoor_Meteo) 
-Number rainHour               	  "hodina [%.1f mm]"        		 <humidity>            	      (dOutdoor_Meteo) 
-Number rainDay                	  "den [%.1f mm]"           		 <humidity>                   (dOutdoor_Meteo) 
-Number rainMonth                  "měsíc [%.1f mm]"         		 <humidity>                   (dOutdoor_Meteo) 
-Number rainYear                   "rok [%.1f mm]"           		 <humidity>                   (dOutdoor_Meteo) 
-Switch dGRain_Restart             "Restart ESP srážky"                      <socket>      				  (dOutdoor_Meteo)
+Number rainLastHour               "Poslední hodina [%.1f mm]"        <humidity>            	  	  (dOutdoor_Meteo) 
+Number rainLastDay                "Poslední den [%.1f mm]"           <humidity>                   (dOutdoor_Meteo) 
+Number rainLastMonth              "Poslední měsíc [%.1f mm]"         <humidity>                   (dOutdoor_Meteo) 
+Number rainLastYear               "Poslední rok [%.1f mm]"           <humidity>                   (dOutdoor_Meteo) 
+Number rainHour               	  "Tato hodina [%.1f mm]"        	 <humidity>            	      (dOutdoor_Meteo) 
+Number rainDay                	  "Dnes [%.1f mm]"           		 <humidity>                   (dOutdoor_Meteo) 
+Number rainMonth                  "Tento měsíc [%.1f mm]"         	 <humidity>                   (dOutdoor_Meteo) 
+Number rainYear                   "Letos [%.1f mm]"           		 <humidity>                   (dOutdoor_Meteo) 
+Switch dGRain_Restart             "Restart ESP srážky"               <socket>      				  (dOutdoor_Meteo)
     {mqtt=">[broker:/home/Srazkomer/esp05/com:command:on:ON],
            >[broker:/home/Srazkomer/esp05/com:command:off:OFF],
            <[broker:/home/Srazkomer/esp05/state:state:default]"}
