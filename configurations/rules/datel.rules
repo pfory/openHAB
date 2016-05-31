@@ -563,6 +563,7 @@ then
 	}
 end
 
+/*
 rule "Srazky"
 when
 	Time cron "0 * * * * ?"
@@ -572,3 +573,4 @@ then
 	rainLastMonth.postUpdate(PulseRainOne.sumSince(now().minusMonths(1), "mysql")*koefRain)
 	rainLastYear.postUpdate(PulseRainOne.sumSince(now().minusYears(1), "mysql")*koefRain)
 end
+*/
