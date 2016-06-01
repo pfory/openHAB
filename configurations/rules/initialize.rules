@@ -7,25 +7,22 @@ rule "Initialize all items"
 when
 	System started
 then
-	logInfo(	"Initializer", "Started Timer ...")
-	
+  logDebug("pf", "initialize.rules start")
 	
 	//Wir warten x Sekunden, dann initalisieren wir alle die nicht aus der Datenbank befüllt wurden
-	createTimer(now.plusSeconds(60)) [|
+	//createTimer(now.plusSeconds(60)) [|
 		
-		logInfo(	"Initializer", "... initializing!")
+  logDebug("pf", "... initializing!")
+	
+	//Null
+  logDebug("pf", "zero")
+	gInitializeZero.allMembers.filter( x | x.state == Uninitialized || x.state == Undefined).forEach[ item | item.postUpdate(0)]
 		
-		//Null
-		gInitializeZero.allMembers.filter( x | x.state == Uninitialized || x.state == Undefined).forEach[ item |
-			item.postUpdate( 0)
-		]
-		
-		//On/Off für Schalter
-		gInitializeOn.allMembers.filter( x | x.state == Uninitialized || x.state == Undefined).forEach[ item |
-			item.postUpdate( ON)
-		]
-		gInitializeOff.allMembers.filter( x | x.state == Uninitialized || x.state == Undefined).forEach[ item |
-			item.postUpdate( OFF)
-		]
-	]
+	//On/Off für Schalter
+  logDebug("pf", "on")
+	gInitializeOn.allMembers.filter( x | x.state == Uninitialized || x.state == Undefined).forEach[ item | item.postUpdate( ON)]
+  logDebug("pf", "off")
+	gInitializeOff.allMembers.filter( x | x.state == Uninitialized || x.state == Undefined).forEach[ item |item.postUpdate( OFF)]
+	//]
+  logDebug("pf", "initialize.rules end")
 end

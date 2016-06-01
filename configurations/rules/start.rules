@@ -1,0 +1,41 @@
+import org.openhab.core.library.types.*
+import org.openhab.core.persistence.*
+import org.openhab.model.script.actions.*
+import java.util.Date
+import org.joda.time.*
+import java.lang.Math
+
+var Number koefRain = 0.2 //mm per pulse 
+
+rule "Update from database on startup"
+when System started
+then
+  logDebug("pf", "-----------------------------refresh rules start-------------------------------------------")
+  logDebug("pf", "energy")
+	EnergyTotalFlat.postUpdate(EnergyTotalFlat.previousState(true, "mysql").state)
+	EnergyHourFlat.postUpdate(EnergyHourFlat.previousState(true, "mysql").state)
+	EnergyDayFlat.postUpdate(EnergyDayFlat.previousState(true, "mysql").state)
+	EnergyMonthFlat.postUpdate(EnergyMonthFlat.previousState(true, "mysql").state)
+	EnergyYearFlat.postUpdate(EnergyYearFlat.previousState(true, "mysql").state)
+
+	EnergyTotal.postUpdate(EnergyTotal.previousState(true, "mysql").state)
+	EnergyHour.postUpdate(EnergyHour.previousState(true, "mysql").state)
+	EnergyDay.postUpdate(EnergyDay.previousState(true, "mysql").state)
+	EnergyMonth.postUpdate(EnergyMonth.previousState(true, "mysql").state)
+	EnergyYear.postUpdate(EnergyYear.previousState(true, "mysql").state)
+
+  logDebug("pf", "solar")
+	dGSolar_EnergyTotal.postUpdate(dGSolar_EnergyTotal.previousState(true, "mysql").state)
+	dGSolar_EnergyDay.postUpdate(dGSolar_EnergyDay.previousState(true, "mysql").state)
+	dGSolar_EnergyMonth.postUpdate(dGSolar_EnergyMonth.previousState(true, "mysql").state)
+	dGSolar_EnergyYear.postUpdate(dGSolar_EnergyYear.previousState(true, "mysql").state)
+	dGSolar_MinutesTotal.postUpdate(dGSolar_MinutesTotal.previousState(true, "mysql").state)
+
+  logDebug("pf", "rain")
+ 	rainHour.postUpdate(PulseRainOne.sumSince(now().withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0), "mysql")*koefRain)
+	rainDay.postUpdate(PulseRainOne.sumSince(now().withTimeAtStartOfDay(), "mysql")*koefRain)
+	rainMonth.postUpdate(PulseRainOne.sumSince(now().withDayOfMonth(1).withMillisOfDay(0), "mysql")*koefRain)
+	rainYear.postUpdate(PulseRainOne.sumSince(now().withDayOfYear(1).withMillisOfDay(0), "mysql")*koefRain)
+	LastUpdatePulse.postUpdate(LastUpdatePulse.previousState(true, "mysql").state)
+  logDebug("pf", "-----------------------------refresh rules end-------------------------------------------")
+end

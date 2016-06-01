@@ -225,7 +225,7 @@ Switch dGRain_Restart             "Restart ESP srážky"               <socket> 
 
 
 /* GREEN HOUSE*/
-Number Green_temp                  "Teplota skleník [%.1f °C]"  <temperature>             		  (dgTemperatures, dOutdoor_Green) 
+Number Green_temp                  "Teplota skleník [%.1f °C]"  <temperature>             		  (gInitializeZero,dgTemperatures, dOutdoor_Green) 
     {mqtt="<[broker:/home/sklenik/esp10/temperature:state:default]"}
 Number Green_humidity              "Vlhkost [%.1f]"     		<humidity>                          (dOutdoor_Green) 
     {mqtt="<[broker:/home/sklenik/esp10/humidity:state:default]"}

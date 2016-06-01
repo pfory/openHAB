@@ -1,4 +1,4 @@
-import org.openhab.core.library.types.*
+﻿import org.openhab.core.library.types.*
 import org.openhab.core.persistence.*
 import org.openhab.model.script.actions.*
 import java.util.Date
@@ -23,7 +23,7 @@ var long oldTimeSolar=0
 //var Number longitude = 13.5315597
 var Number koefRain = 0.2 //mm per pulse 
 
-
+/* 
 rule "Update from database on startup"
 when System started
 then
@@ -43,15 +43,7 @@ then
 	dGSolar_EnergyDay.postUpdate(dGSolar_EnergyDay.previousState(true, "mysql").state)
 	dGSolar_EnergyMonth.postUpdate(dGSolar_EnergyMonth.previousState(true, "mysql").state)
 	dGSolar_EnergyYear.postUpdate(dGSolar_EnergyYear.previousState(true, "mysql").state)
-  /*if (dGSolar_MinutesDay.state==Uninitialized) {
-    dGSolar_MinutesDay.postUpdate(0)
-  }
-	dGSolar_MinutesDay.postUpdate(dGSolar_MinutesDay.previousState(true, "mysql").state)
-  if (dGSolar_MinutesTotal.state==Uninitialized) {
-    dGSolar_MinutesTotal.postUpdate(0)
-  }
-	dGSolar_MinutesTotal.postUpdate(dGSolar_MinutesTotal.previousState(true, "mysql").state)
-*/
+
 	rainLastHour.postUpdate(PulseRainOne.sumSince(now().minusHours(1), "mysql")*koefRain)
 	rainLastDay.postUpdate(PulseRainOne.sumSince(now().minusDays(1), "mysql")*koefRain)
 	rainLastMonth.postUpdate(PulseRainOne.sumSince(now().minusMonths(1), "mysql")*koefRain)
@@ -62,10 +54,11 @@ then
 	rainMonth.postUpdate(PulseRainOne.sumSince(now().withDayOfMonth(1).withMillisOfDay(0), "mysql")*koefRain)
 	rainYear.postUpdate(PulseRainOne.sumSince(now().withDayOfYear(1).withMillisOfDay(0), "mysql")*koefRain)
 
-	PulseRain.postUpdate(PulseRain.previousState(false, "mysql").state)
+	LastUpdatePulse.postUpdate(LastUpdatePulse.previousState(true, "mysql").state)
+	//PulseRain.postUpdate(PulseRain.previousState(false, "mysql").state)
 
 end
-
+*/
 
 rule "Lamp outdoor timed OFF"
 when
@@ -354,6 +347,7 @@ then
   }
 
   if (dGSolar_Pump.state == OFF) {
+    oldTimeSolar=0;
     if (dGSolar_lastOFFDay==Uninitialized || dGSolar_lastOFFDay==null) {
       logDebug("pf", "dGSolar_lastOFFDay:"+now.toString())
       dGSolar_lastOFFDay.postUpdate(now.toString())
@@ -386,12 +380,22 @@ then
         
           if (oldTimeSolar>0) {
             var long deltaTime = now.millis - oldTimeSolar
-            var Number minDayOld = dGSolar_MinutesDay.state as DecimalType
-            var Number minTotalOld = dGSolar_MinutesTotal.state as DecimalType
-            dGSolar_MinutesDay.postUpdate(minDayOld+(deltaTime/60000))
-            dGSolar_MinutesTotal.postUpdate(minTotalOld+deltaTime/60000)
-            oldTimeSolar = now.millis
+            if (dGSolar_MinutesDay.state==Uninitialized) {
+              dGSolar_MinutesDay.postUpdate(0);
+            }
+            if (dGSolar_MinutesTotal.state==Uninitialized) {
+              dGSolar_MinutesTotal.postUpdate(0);
+            }
             logDebug("pf", "-------------------")
+            var Number min = dGSolar_MinutesDay.state as DecimalType
+            min=min+(deltaTime/60000.0)
+            logDebug("pf", "minutesDay:"+(min))
+            dGSolar_MinutesDay.postUpdate(min)
+            min = dGSolar_MinutesTotal.state as DecimalType
+            min=min+(deltaTime/60000.0)
+            logDebug("pf", "minutesTotal:"+(min))
+            dGSolar_MinutesTotal.postUpdate(min)
+            oldTimeSolar = now.millis
             logDebug("pf", "deltaTime:"+deltaTime.toString())
             logDebug("pf", "tIN:"+tIN.toString())
             logDebug("pf", "tOUT:"+tOUT.toString())
@@ -545,33 +549,6 @@ then
 		rainDay.postUpdate(PulseRainOne.sumSince(now().withTimeAtStartOfDay(), "mysql")*koefRain)
 		rainMonth.postUpdate(PulseRainOne.sumSince(now().withDayOfMonth(1).withMillisOfDay(0), "mysql")*koefRain)
 		rainYear.postUpdate(PulseRainOne.sumSince(now().withDayOfYear(1).withMillisOfDay(0), "mysql")*koefRain)
-
-    /* 
-	    if (rainHour.state != Uninitialized) {
-	      var Number stav=rainHour.state as DecimalType
-	      rainHour.postUpdate(stav + koefRain)
-	    } else {
-	      rainHour.postUpdate(koefRain)
-	    }  
-	    if (rainDay.state != Uninitialized) {
-	      var Number stav=rainDay.state as DecimalType
-	      rainDay.postUpdate(stav + koefRain)
-	    } else {
-	      rainDay.postUpdate(koefRain)
-	    }   
-	    if (rainMonth.state != Uninitialized) {
-	      var Number stav=rainMonth.state as DecimalType
-	      rainMonth.postUpdate(stav + koefRain)
-	    } else {
-	      rainMonth.postUpdate(koefRain)
-	    }   
-	    if (rainYear.state != Uninitialized) {
-	      var Number stav=rainYear.state as DecimalType
-	      rainYear.postUpdate(stav + koefRain)
-	    } else {
-	      rainYear.postUpdate(koefRain)
-	    }   
-      */
 	}
 end
 
