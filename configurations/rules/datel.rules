@@ -43,9 +43,15 @@ then
 	dGSolar_EnergyDay.postUpdate(dGSolar_EnergyDay.previousState(true, "mysql").state)
 	dGSolar_EnergyMonth.postUpdate(dGSolar_EnergyMonth.previousState(true, "mysql").state)
 	dGSolar_EnergyYear.postUpdate(dGSolar_EnergyYear.previousState(true, "mysql").state)
+  /*if (dGSolar_MinutesDay.state==Uninitialized) {
+    dGSolar_MinutesDay.postUpdate(0)
+  }
 	dGSolar_MinutesDay.postUpdate(dGSolar_MinutesDay.previousState(true, "mysql").state)
+  if (dGSolar_MinutesTotal.state==Uninitialized) {
+    dGSolar_MinutesTotal.postUpdate(0)
+  }
 	dGSolar_MinutesTotal.postUpdate(dGSolar_MinutesTotal.previousState(true, "mysql").state)
-
+*/
 	rainLastHour.postUpdate(PulseRainOne.sumSince(now().minusHours(1), "mysql")*koefRain)
 	rainLastDay.postUpdate(PulseRainOne.sumSince(now().minusDays(1), "mysql")*koefRain)
 	rainLastMonth.postUpdate(PulseRainOne.sumSince(now().minusMonths(1), "mysql")*koefRain)
@@ -569,7 +575,7 @@ then
 	}
 end
 
-/*
+
 rule "Srazky"
 when
 	Time cron "0 * * * * ?"
@@ -579,4 +585,3 @@ then
 	rainLastMonth.postUpdate(PulseRainOne.sumSince(now().minusMonths(1), "mysql")*koefRain)
 	rainLastYear.postUpdate(PulseRainOne.sumSince(now().minusYears(1), "mysql")*koefRain)
 end
-*/
